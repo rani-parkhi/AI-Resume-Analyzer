@@ -298,6 +298,65 @@ def highlight_keywords(text, skills):
         text = text.replace(skill, f"{skill.upper()}")
      return text
 
+def check_resume_sections(text):
+    
+    text = text.lower()
+
+    sections = {
+
+        "Contact Information": (
+            "gmail" in text or
+            "linkedin" in text or
+            "github" in text or
+            re.search(r"\b91\s?\d{10}\b", text) is not None or
+            re.search(r"\b\d{10}\b", text) is not None
+        ),
+
+        "Education": any(word in text for word in [
+            "b.tech",
+            "btech",
+            "be",
+            "b.e",
+            "bachelor",
+            "diploma",
+            "m.tech",
+            "mtech",
+            "college",
+            "university"
+        ]),
+
+        "Skills": len(extract_skills(text, common_skills)) >= 3,
+
+        "Projects": any(word in text for word in [
+            "project",
+            "expense tracker",
+            "resume analyzer",
+            "management system",
+            "dashboard",
+            "portfolio"
+        ]),
+
+        "Experience": any(word in text for word in [
+            "experience",
+            "intern",
+            "internship",
+            "worked",
+            "training"
+        ]),
+
+        "Certifications": any(word in text for word in [
+            "certificate",
+            "certification",
+            "certified",
+            "coursera",
+            "udemy",
+            "sololearn",
+            "nptel"
+        ])
+    }
+
+    return sections
+
 #---------------- ANALYSIS ----------------
 
 if analyze:
@@ -315,6 +374,7 @@ if analyze:
             else:
                 resume_text = extract_text_from_txt(uploaded_file)
             resume_text = clean_text(resume_text)
+            section_status = check_resume_sections(resume_text)
             required_skills = JOB_ROLE_SKILLS[job_role]
             job_text = " ".join(required_skills)
             # NLP-based Similarity
@@ -387,6 +447,18 @@ if analyze:
         st.write(f"🛠 Skill Match: {skill_score}%")
         st.write(f"🔑 Keyword Optimization: {keyword_score}%")
         st.markdown('</div>', unsafe_allow_html=True)
+
+        # ---------------- ATS RESUME SECTIONS ----------------
+        
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.subheader("📑 ATS Resume Sections")
+        for section, found in section_status.items():
+            if found:
+                st.success(f"✅ {section}")
+            else:
+                st.error(f"❌ {section}")
+        st.markdown('</div>', unsafe_allow_html=True)
+
         # ---------------- SKILLS ----------------
         col1, col2 = st.columns(2)
         with col1:
