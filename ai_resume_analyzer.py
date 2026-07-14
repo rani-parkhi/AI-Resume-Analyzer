@@ -166,6 +166,36 @@ JOB_ROLE_SKILLS = {
     ]
 }
 
+JOB_ROLE_DESCRIPTION = {
+
+    "AI Engineer":
+    """
+    AI Engineer skilled in Python, machine learning, deep learning,
+    artificial intelligence, data science, TensorFlow, PyTorch,
+    computer vision, NLP and developing AI applications.
+    """,
+
+    "Machine Learning Engineer":
+    """
+    Machine Learning Engineer skilled in Python, machine learning,
+    deep learning, model development, data preprocessing,
+    scikit-learn, TensorFlow, PyTorch and deployment.
+    """,
+
+    "Data Scientist":
+    """
+    Data Scientist skilled in Python, SQL, statistics,
+    data analysis, machine learning, pandas, numpy,
+    visualization and predictive modeling.
+    """,
+
+    "Web Developer":
+    """
+    Web Developer skilled in HTML, CSS, JavaScript,
+    React, Node.js, databases, APIs and building websites.
+    """
+}
+
 
 #---------------- HEADER ----------------
 
@@ -261,6 +291,57 @@ def detailed_scores(resume_text, jd_skills, matched_skills):
         int(skill_score),
         int(keyword_score)
     )
+
+def calculate_final_score(
+    ml_score,
+    matched_skills,
+    jd_skills,
+    section_status,
+    resume_text
+):
+
+    # ---------- Skill Score ----------
+    if len(jd_skills) == 0:
+        skill_score = 0
+    else:
+        skill_score = (
+            len(matched_skills) /
+            len(jd_skills)
+        ) * 100
+
+    # ---------- Resume Length ----------
+    words = len(resume_text.split())
+
+    if words < 150:
+        length_score = 40
+    elif words < 250:
+        length_score = 70
+    elif words <= 700:
+        length_score = 100
+    else:
+        length_score = 80
+
+    # ---------- ATS Section Score ----------
+    section_score = (
+        sum(section_status.values())
+        / len(section_status)
+    ) * 100
+
+    # ---------- Final Score ----------
+    # Weight Distribution:
+    # Skill Match = 60%
+    # NLP Similarity = 10%
+    # ATS Sections = 20%
+    # Resume Quality = 10%
+    
+    final_score = (
+    skill_score * 0.60 +
+    ml_score * 0.10 +
+    section_score * 0.20 +
+    length_score * 0.10
+    )
+
+    return round(final_score, 2)
 
 #Improvement tips
 
@@ -376,7 +457,10 @@ if analyze:
             resume_text = clean_text(resume_text)
             section_status = check_resume_sections(resume_text)
             required_skills = JOB_ROLE_SKILLS[job_role]
-            job_text = " ".join(required_skills)
+            job_text = JOB_ROLE_DESCRIPTION.get(
+                job_role,
+                " ".join(required_skills)
+                )
             # NLP-based Similarity
             ml_score = compute_similarity(resume_text, job_text)
             # Skill extraction
@@ -392,35 +476,15 @@ if analyze:
                 for skill in jd_skills
                 if skill not in resume_skills
                 ]
-            # Basic scoring
-            basic_score = 0
-            if len(jd_skills) > 0:
-                basic_score = round((len(matched_skills) / len(jd_skills)) * 100)
-
-            # ----- Weighted Final Score -----
-            similarity_weight = 30
-            skill_weight = 50
-            resume_weight = 20
-
-            # Resume quality based on length
-            word_count = len(resume_text.split())
-
-            if word_count < 150:
-                resume_quality = 40
-            elif word_count < 300:
-                resume_quality = 70
-            elif word_count <= 700:
-                resume_quality = 100
-            else:
-                resume_quality = 80
-
-            final_score = round(
-                (ml_score * similarity_weight / 100)
-                + (basic_score * skill_weight / 100)
-                + (resume_quality * resume_weight / 100),
-                2
+            
+            final_score = calculate_final_score(
+                ml_score,
+                matched_skills,
+                jd_skills,
+                section_status,
+                resume_text
                 )
-
+            
         st.success("Analysis Completed ✅")
 
         # ---------------- MAIN SCORE ----------------
@@ -433,6 +497,9 @@ if analyze:
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.subheader("🤖 NLP + ML Similarity Score")
         st.write(f"Similarity Score: {ml_score}%")
+        st.write("Skill Score:", round((len(matched_skills) / max(len(jd_skills), 1)) * 100, 2))
+        st.write("ATS Section Score:", round((sum(section_status.values()) / len(section_status)) * 100, 2))
+        st.write("Resume Words:", len(resume_text.split()))
         st.markdown('</div>', unsafe_allow_html=True)
         # ---------------- ATS BREAKDOWN ----------------
         length_score, skill_score, keyword_score = detailed_scores(
