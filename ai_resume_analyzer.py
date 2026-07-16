@@ -22,8 +22,21 @@ st.set_page_config(page_title="AI Resume Analyzer", page_icon="📄", layout="wi
 st.markdown("""
 <style>
 .main { background-color: #f5f7fa; }
-.title { font-size: 40px; font-weight: bold; text-align: center; color: #2c3e50; }
-.subtitle { text-align: center; color: #7f8c8d; font-size: 18px; }
+            .title{
+    font-size:42px;
+    font-weight:700;
+    text-align:center;
+    color:#1F2937;
+    font-family:'Segoe UI',sans-serif;
+    margin-bottom:5px;
+}
+.subtitle{
+    text-align:center;
+    color:#6B7280;
+    font-size:18px;
+    font-family:'Segoe UI',sans-serif;
+    margin-bottom:10px;
+}
 .card {
     background-color: white;
     padding: 20px;
@@ -198,11 +211,15 @@ JOB_ROLE_DESCRIPTION = {
 
 
 #---------------- HEADER ----------------
-
-st.markdown('<div class="title">📄 AI Resume Analyzer</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Analyze your Resume within seconds...</div>', unsafe_allow_html=True) 
-st.write("---")
-
+st.markdown(
+    '<div class="title">📄 AI Resume Analyzer</div>',
+    unsafe_allow_html=True
+)
+st.markdown(
+    '<div class="subtitle">Smart ATS Analysis • AI-Powered Resume Evaluation • Job Role Matching</div>',
+    unsafe_allow_html=True
+)
+st.caption("Upload your resume, select a target job role, and receive an ATS compatibility report in seconds.")
 #---------------- INPUT ----------------
 
 st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -489,10 +506,19 @@ if analyze:
 
         # ---------------- MAIN SCORE ----------------
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("🎯 Final Match Score")
-        st.progress(min(int(final_score), 100))
-        st.write(f"### {final_score}% Match")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.subheader("🎯 Resume Match Score")
+        col1, col2 = st.columns([3,1])
+        with col1:
+            st.progress(int(final_score))
+        with col2:
+            if final_score >= 80:
+                st.success(f"{final_score}%")
+            elif final_score >= 60:
+                st.warning(f"{final_score}%")
+            else:
+                st.error(f"{final_score}%")
+        st.caption(f"Target Role : **{job_role}**")
+        st.markdown("</div>", unsafe_allow_html=True)
         # ---------------- ML SCORE ----------------
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.subheader("🤖 NLP + ML Similarity Score")
