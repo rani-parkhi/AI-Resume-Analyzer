@@ -21,29 +21,66 @@ st.set_page_config(page_title="AI Resume Analyzer", page_icon="📄", layout="wi
 
 st.markdown("""
 <style>
-.main { background-color: #f5f7fa; }
-            .title{
-    font-size:42px;
-    font-weight:700;
-    text-align:center;
-    color:#1F2937;
-    font-family:'Segoe UI',sans-serif;
-    margin-bottom:5px;
+
+.stApp {
+    background-color: #F5F7FA;
 }
-.subtitle{
-    text-align:center;
-    color:#6B7280;
-    font-size:18px;
-    font-family:'Segoe UI',sans-serif;
-    margin-bottom:10px;
+
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    max-width: 1200px;
 }
+
+/* Main Header */
+.title {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    text-align: center;
+    color: #1F2937;
+    margin-bottom: 8px;
+}
+
+/* Subtitle */
+.subtitle {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    text-align: center;
+    color: #6B7280;
+    margin-bottom: 25px;
+}
+
+/* Cards */
 .card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+    background-color: #FFFFFF;
+    padding: 24px;
+    border-radius: 14px;
+    border: 1px solid #E5E7EB;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.06);
     margin-bottom: 20px;
 }
+            
+            /* Analyze Button */
+.stButton > button {
+    width: 100%;
+    height: 48px;
+    background-color: #2563EB;
+    color: #FFFFFF;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.stButton > button:hover {
+    background-color: #1D4ED8;
+    color: #FFFFFF;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -209,27 +246,72 @@ JOB_ROLE_DESCRIPTION = {
     """
 }
 
-
 #---------------- HEADER ----------------
+
 st.markdown(
     '<div class="title">📄 AI Resume Analyzer</div>',
     unsafe_allow_html=True
 )
+
 st.markdown(
-    '<div class="subtitle">Smart ATS Analysis • AI-Powered Resume Evaluation • Job Role Matching</div>',
+    '<div class="subtitle">AI-powered resume analysis based on your target job role</div>',
     unsafe_allow_html=True
 )
-st.caption("Upload your resume, select a target job role, and receive an ATS compatibility report in seconds.")
+
+st.write("---")
+
 #---------------- INPUT ----------------
 
 st.markdown('<div class="card">', unsafe_allow_html=True)
-uploaded_file = st.file_uploader("📤 Upload Resume", type=["pdf", "txt" , "docx"]) 
+
+st.markdown(
+    """
+    <div style="
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1F2937;
+        margin-bottom: 5px;
+    ">
+        📋 Resume Analysis
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <div style="
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 15px;
+        color: #6B7280;
+        margin-bottom: 20px;
+    ">
+        Upload your resume and select the job role you are targeting.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+uploaded_file = st.file_uploader(
+    "📤 Upload Resume",
+    type=["pdf", "txt", "docx"],
+    help="Upload your resume in PDF, TXT, or DOCX format."
+)
+
 job_role = st.selectbox(
-    "🎯 Select Your Target Job Role",
+    "🎯 Target Job Role",
     ["Select a Role"] + list(JOB_ROLE_SKILLS.keys())
 )
+
 st.markdown('</div>', unsafe_allow_html=True)
-analyze = st.button("🔍 Analyze Resume", use_container_width=True)
+
+# Analyze Button
+
+analyze = st.button(
+    "🔍 Analyze Resume",
+    use_container_width=True
+)
 
 #---------------- HELPER FUNCTIONS ----------------
 
@@ -505,123 +587,630 @@ if analyze:
         st.success("Analysis Completed ✅")
 
         # ---------------- MAIN SCORE ----------------
+        
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("🎯 Resume Match Score")
-        col1, col2 = st.columns([3,1])
-        with col1:
-            st.progress(int(final_score))
-        with col2:
-            if final_score >= 80:
-                st.success(f"{final_score}%")
-            elif final_score >= 60:
-                st.warning(f"{final_score}%")
-            else:
-                st.error(f"{final_score}%")
-        st.caption(f"Target Role : **{job_role}**")
-        st.markdown("</div>", unsafe_allow_html=True)
-        # ---------------- ML SCORE ----------------
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("🤖 NLP + ML Similarity Score")
-        st.write(f"Similarity Score: {ml_score}%")
-        st.write("Skill Score:", round((len(matched_skills) / max(len(jd_skills), 1)) * 100, 2))
-        st.write("ATS Section Score:", round((sum(section_status.values()) / len(section_status)) * 100, 2))
-        st.write("Resume Words:", len(resume_text.split()))
+        st.markdown(
+            """
+            <div style="
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 10px;
+            ">
+            🎯 Resume Match Score
+            </div>
+            """,
+            unsafe_allow_html=True
+            )
+        
+        st.markdown(
+            f"""
+            <div style="
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            color: #2563EB;
+            margin-bottom: 5px;
+            ">
+            {final_score}%
+            </div>
+            """,
+            unsafe_allow_html=True
+            )
+        
+        st.markdown(
+            f"""
+            <div style="
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 15px;
+            color: #6B7280;
+            margin-bottom: 15px;
+            ">
+            Target Role: <strong>{job_role}</strong>
+            </div>
+            """,
+            unsafe_allow_html=True
+            )
+        
+        st.progress(min(int(final_score), 100))
+        
         st.markdown('</div>', unsafe_allow_html=True)
+
+        # ---------------- ANALYSIS METRICS ----------------
+        
+        skill_match_display = round(
+            (len(matched_skills) / max(len(jd_skills), 1)) * 100,
+            2
+            )
+        
+        ats_section_display = round(
+            (sum(section_status.values()) / len(section_status)) * 100,
+            2
+            )
+        
+        resume_words_display = len(resume_text.split())
+        
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        
+        st.markdown(
+            """
+            <div style="
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 20px;
+            ">
+        🤖 Resume Analysis Metrics
+        </div>
+        """,
+        unsafe_allow_html=True
+        )
+        
+        metric1, metric2, metric3, metric4 = st.columns(4)
+        with metric1:
+            st.metric(
+                "🤖 NLP Similarity",
+                f"{ml_score}%"
+                )
+            
+            with metric2:
+                st.metric(
+                    "🛠 Skill Match",
+                    f"{skill_match_display}%"
+                    )
+                
+                with metric3:
+                    st.metric(
+                        "📑 ATS Sections",
+                        f"{ats_section_display}%"
+                        )
+                
+                with metric4:
+                    st.metric(
+                        "📄 Resume Words",
+                        f"{resume_words_display}"
+                        )
+        st.markdown('</div>', unsafe_allow_html=True)
+
         # ---------------- ATS BREAKDOWN ----------------
+        
         length_score, skill_score, keyword_score = detailed_scores(
             resume_text,
             jd_skills,
             matched_skills
             )
-
-        st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("📊 ATS Score Breakdown")
-        st.write(f"📄 Resume Length: {length_score}%")
-        st.write(f"🛠 Skill Match: {skill_score}%")
-        st.write(f"🔑 Keyword Optimization: {keyword_score}%")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # ---------------- ATS RESUME SECTIONS ----------------
         
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("📑 ATS Resume Sections")
-        for section, found in section_status.items():
-            if found:
-                st.success(f"✅ {section}")
-            else:
-                st.error(f"❌ {section}")
+        
+        st.markdown(
+            """
+            <div style="
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 20px;
+            ">
+            📊 ATS Score Breakdown
+            </div>
+            """,
+            unsafe_allow_html=True
+            )
+        
+        ats1, ats2, ats3 = st.columns(3)
+        
+        with ats1:
+            st.metric(
+                "📄 Resume Length",
+                f"{length_score}%"
+                )
+            
+            with ats2:
+                st.metric(
+                    "🛠 Skill Match",
+                    f"{skill_score}%"
+                    )
+                
+            with ats3:
+                st.metric(
+                    "🔑 Keyword Optimization",
+                    f"{keyword_score}%"
+                    )
+                st.markdown(
+                    """
+                    <div style="
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 13px;
+                    color: #6B7280;
+                    margin-top: 15px;
+                    ">
+                    ATS scores are based on resume structure, relevant skills,
+                    and keyword alignment with the selected role.
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                    )
+                
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+        # ---------------- ATS RESUME SECTIONS ----------------
+
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 20px;
+                font-weight: 600;
+                color: #1F2937;
+                margin-bottom: 8px;
+            ">
+                📑 ATS Resume Sections
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 14px;
+                color: #6B7280;
+                margin-bottom: 20px;
+            ">
+                Checks whether important resume sections are detected.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        section_col1, section_col2 = st.columns(2)
+
+        section_items = list(section_status.items())
+
+        with section_col1:
+            for section, found in section_items[:3]:
+                if found:
+                    st.success(f"✅ {section}")
+                else:
+                    st.error(f"❌ {section}")
+
+        with section_col2:
+            for section, found in section_items[3:]:
+                if found:
+                    st.success(f"✅ {section}")
+                else:
+                    st.error(f"❌ {section}")
+
         st.markdown('</div>', unsafe_allow_html=True)
 
+        
         # ---------------- SKILLS ----------------
-        col1, col2 = st.columns(2)
-        with col1:
+
+        skill_col1, skill_col2 = st.columns(2)
+
+        # Resume Skills
+        with skill_col1:
+
             st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.subheader("✅ Resume Skills")
-            st.write(", ".join(resume_skills) if resume_skills else "No skills found")
+
+            st.markdown(
+                """
+                <div style="
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 20px;
+                    font-weight: 600;
+                    color: #1F2937;
+                    margin-bottom: 8px;
+                ">
+                    ✅ Resume Skills
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                """
+                <div style="
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 14px;
+                    color: #6B7280;
+                    margin-bottom: 15px;
+                ">
+                    Skills detected from your resume
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            if resume_skills:
+                st.write(", ".join(resume_skills))
+            else:
+                st.info("No relevant skills detected.")
+
             st.markdown('</div>', unsafe_allow_html=True)
 
-        with col2:
+        # Job Skills
+        with skill_col2:
+
             st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.subheader("🎯 Job Skills")
-            st.write(", ".join(jd_skills) if jd_skills else "No skills found")
+
+            st.markdown(
+                """
+                <div style="
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 20px;
+                    font-weight: 600;
+                    color: #1F2937;
+                    margin-bottom: 8px;
+                ">
+                    🎯 Required Skills
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            st.markdown(
+                """
+                <div style="
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 14px;
+                    color: #6B7280;
+                    margin-bottom: 15px;
+                ">
+                    Skills expected for the selected role
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            if jd_skills:
+                st.write(", ".join(jd_skills))
+            else:
+                st.info("No required skills available.")
+
             st.markdown('</div>', unsafe_allow_html=True)
 
-         # ---------------- MISSING SKILLS ----------------
+        
+        # ---------------- MISSING SKILLS ----------------
+
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("❌ Missing Skills")
-        st.write(", ".join(missing_skills) if missing_skills else "No missing skills 🎉")
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 20px;
+                font-weight: 600;
+                color: #1F2937;
+                margin-bottom: 8px;
+            ">
+                ❌ Missing Skills
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 14px;
+                color: #6B7280;
+                margin-bottom: 15px;
+            ">
+                Skills required for the selected role that were not detected in your resume.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        if missing_skills:
+            st.warning(
+                "Missing: " + ", ".join(missing_skills)
+            )
+        else:
+            st.success(
+                "🎉 Excellent! All required role skills were detected in your resume."
+            )
+
         st.markdown('</div>', unsafe_allow_html=True)
 
-       # ---------------- CHART ----------------
-       # ---------------- CHART ----------------
+        # ---------------- SKILL ANALYSIS ----------------
+
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("📊 Skill Analysis")
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 20px;
+                font-weight: 600;
+                color: #1F2937;
+                margin-bottom: 8px;
+            ">
+                📊 Skill Analysis
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 14px;
+                color: #6B7280;
+                margin-bottom: 20px;
+            ">
+                Comparison between skills detected in your resume and skills required for the selected role.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         matched_count = len(matched_skills)
         missing_count = len(missing_skills)
 
-        # ✅ FIX: prevent crash
         if matched_count == 0 and missing_count == 0:
-            st.warning("No skills found to display chart.")
+
+            st.info("No relevant skills found to display.")
+
         else:
-            fig, ax = plt.subplots()
-            ax.pie(
-            [matched_count, missing_count],
-            labels=["Matched", "Missing"],
-            autopct="%1.1f%%"
-        )
-            st.pyplot(fig)
+
+            chart_col1, chart_col2 = st.columns([2, 1])
+
+            with chart_col1:
+
+                fig, ax = plt.subplots(figsize=(5, 4))
+
+                ax.pie(
+                    [matched_count, missing_count],
+                    labels=["Matched", "Missing"],
+                    autopct="%1.1f%%",
+                    startangle=90
+                )
+
+                ax.set_title(
+                    "Required Skill Coverage",
+                    fontsize=14,
+                    fontweight="bold"
+                )
+
+                st.pyplot(fig)
+
+            with chart_col2:
+
+                st.metric(
+                    "✅ Matched Skills",
+                    matched_count
+                )
+
+                st.metric(
+                    "❌ Missing Skills",
+                    missing_count
+                )
+
+                total_required = matched_count + missing_count
+
+                if total_required > 0:
+                    coverage = round(
+                        (matched_count / total_required) * 100,
+                        2
+                    )
+                else:
+                    coverage = 0
+
+                st.metric(
+                    "🎯 Skill Coverage",
+                    f"{coverage}%"
+                )
 
         st.markdown('</div>', unsafe_allow_html=True)
-        # ---------------- TIPS ----------------
+
+        # ---------------- IMPROVEMENT TIPS ----------------
+
+        tips = advanced_tips(final_score, missing_skills)
+
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("🚀 Improvement Tips")
-        for tip in advanced_tips(final_score, missing_skills):
-            st.write("👉", tip)
-            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 20px;
+                font-weight: 600;
+                color: #1F2937;
+                margin-bottom: 8px;
+            ">
+                🚀 Improvement Tips
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 14px;
+                color: #6B7280;
+                margin-bottom: 18px;
+            ">
+                Personalized recommendations based on your resume analysis.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        for tip in tips:
+
+            st.markdown(
+                f"""
+                <div style="
+                    background-color: #F8FAFC;
+                    border: 1px solid #E5E7EB;
+                    border-radius: 10px;
+                    padding: 14px 16px;
+                    margin-bottom: 10px;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 15px;
+                    color: #374151;
+                ">
+                    💡 {tip}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
         # ---------------- KEYWORD HIGHLIGHT ----------------
+
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.subheader("🔍 Keyword Highlight")
-        st.write(highlight_keywords(resume_text[:1000], jd_skills))
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 20px;
+                font-weight: 600;
+                color: #1F2937;
+                margin-bottom: 8px;
+            ">
+                🔍 Keyword Highlight
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 14px;
+                color: #6B7280;
+                margin-bottom: 15px;
+            ">
+                Relevant keywords detected in your resume for the selected role.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        highlighted_text = highlight_keywords(
+            resume_text[:1000],
+            jd_skills
+        )
+
+        st.text_area(
+            "Resume Keyword Preview",
+            highlighted_text,
+            height=220,
+            label_visibility="collapsed"
+        )
+
         st.markdown('</div>', unsafe_allow_html=True)
         
-         # ---------------- DOWNLOAD ----------------
+    # ---------------- DOWNLOAD REPORT ----------------
+
     tips = advanced_tips(final_score, missing_skills)
 
     report = f"""
-    Resume Score: {final_score}%
+    AI RESUME ANALYZER REPORT
 
+    =========================
+
+    Target Role: {job_role}
+    
+    Final Match Score: {final_score}%
+    
+    NLP + ML Similarity Score: {ml_score}%
+    
+    Skill Match Score: {round((len(matched_skills) / max(len(jd_skills), 1)) * 100, 2)}%
+    
+    ATS Section Score: {round((sum(section_status.values()) / len(section_status)) * 100, 2)}%
+    
+    Resume Words: {len(resume_text.split())}
+    
     Matched Skills:
-    {', '.join(matched_skills)}
-
+    {', '.join(matched_skills) if matched_skills else 'None'}
+    
     Missing Skills:
-    {', '.join(missing_skills)}
-
+    {', '.join(missing_skills) if missing_skills else 'None'}
+    
     Improvement Tips:
-    {chr(10).join(tips)}
+    {chr(10).join('- ' + tip for tip in tips)}
+    
+    =========================
+    
+    Generated by AI Resume Analyzer
     """
-    st.download_button("📥 Download Report", report, "resume_report.txt")
+
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+
+    st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 20px;
+                font-weight: 600;
+                color: #1F2937;
+                margin-bottom: 8px;
+            ">
+                📥 Download Analysis Report
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown(
+            """
+            <div style="
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-size: 14px;
+                color: #6B7280;
+                margin-bottom: 18px;
+            ">
+                Download your resume analysis results as a text report.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.download_button(
+            "📥 Download Report",
+            report,
+            "resume_analysis_report.txt",
+            mime="text/plain",
+            use_container_width=True
+        )
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 #---------------- FOOTER ----------------
 
