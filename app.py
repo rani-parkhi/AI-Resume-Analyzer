@@ -5,13 +5,31 @@
 import streamlit as st 
 import matplotlib.pyplot as plt 
 from collections import Counter
-import PyPDF2 
-import re
 
-#NLP / ML imports
+from src.config import (
+    COMMON_SKILLS,
+    JOB_ROLE_SKILLS,
+    JOB_ROLE_DESCRIPTION
+)
 
-from sklearn.feature_extraction.text import TfidfVectorizer 
-from sklearn.metrics.pairwise import cosine_similarity
+from src.resume_parser import (
+    extract_text_from_pdf,
+    extract_text_from_txt,
+    clean_text
+)
+
+from src.skill_extractor import extract_skills
+
+from src.similarity import compute_similarity
+
+from src.scoring import (
+    calculate_final_score,
+    detailed_scores
+)
+
+from src.ats_checker import check_resume_sections
+
+from src.recommendations import advanced_tips
 
 #---------------- PAGE CONFIG ----------------
 
@@ -84,168 +102,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-common_skills = [
-
-    # Programming Languages
-    "python", "java", "c", "c++", "c#", "javascript", "typescript",
-    "php", "ruby", "go", "rust", "swift", "kotlin", "r", "matlab",
-
-    # Web Development
-    "html", "css", "bootstrap", "tailwind css",
-    "react", "angular", "vue", "node.js", "nodejs",
-    "express", "django", "flask", "fastapi", "streamlit",
-
-    # Databases
-    "sql", "mysql", "postgresql", "sqlite",
-    "mongodb", "oracle", "redis",
-
-    # Data Science
-    "numpy", "pandas", "matplotlib",
-    "seaborn", "plotly", "scikit-learn",
-    "statistics", "data analysis", "data visualization",
-
-    # AI / ML
-    "machine learning",
-    "deep learning",
-    "artificial intelligence",
-    "computer vision",
-    "natural language processing",
-    "nlp",
-    "tensorflow",
-    "keras",
-    "pytorch",
-    "opencv",
-
-    # Cloud
-    "aws",
-    "azure",
-    "google cloud",
-    "gcp",
-
-    # DevOps
-    "git",
-    "github",
-    "docker",
-    "kubernetes",
-    "linux",
-
-    # BI
-    "power bi",
-    "tableau",
-    "excel",
-
-     # Software Engineering
-    "oop",
-    "object oriented programming",
-    "dsa",
-    "data structures",
-    "algorithms",
-    "rest api",
-
-    # Soft Skills
-    "communication",
-    "teamwork",
-    "leadership",
-    "problem solving",
-    "critical thinking",
-    "time management"
-]
-
-JOB_ROLE_SKILLS = {
-
-    "AI Engineer": [
-        "python","machine learning","deep learning",
-        "tensorflow","pytorch","numpy","pandas",
-        "scikit-learn","opencv","git","github"
-    ],
-
-    "Machine Learning Engineer": [
-        "python","machine learning","deep learning",
-        "tensorflow","pytorch","numpy","pandas",
-        "scikit-learn","sql","git"
-    ],
-
-    "Data Scientist": [
-        "python","sql","numpy","pandas",
-        "matplotlib","seaborn",
-        "machine learning","statistics",
-        "scikit-learn"
-    ],
-
-    "Data Analyst": [
-        "python","sql","excel",
-        "power bi","tableau",
-        "pandas","numpy"
-    ],
-
-     "Python Developer": [
-        "python","sql","git",
-        "github","flask",
-        "fastapi","oop"
-    ],
-
-    "Frontend Developer": [
-        "html","css","javascript",
-        "react","bootstrap"
-    ],
-
-    "Backend Developer": [
-        "python","sql","flask",
-        "fastapi","mongodb",
-        "mysql","git"
-    ],
-
-     "Full Stack Developer": [
-        "html","css","javascript",
-        "react","node.js",
-        "python","sql",
-        "git","github"
-    ],
-
-    "Software Engineer": [
-        "python","java","c++",
-        "sql","git","github",
-        "oop","dsa"
-    ],
-
-    
-    "Web Developer": [
-        "html","css","javascript",
-        "react","node.js",
-        "sql","git"
-    ]
-}
-
-JOB_ROLE_DESCRIPTION = {
-
-    "AI Engineer":
-    """
-    AI Engineer skilled in Python, machine learning, deep learning,
-    artificial intelligence, data science, TensorFlow, PyTorch,
-    computer vision, NLP and developing AI applications.
-    """,
-
-    "Machine Learning Engineer":
-    """
-    Machine Learning Engineer skilled in Python, machine learning,
-    deep learning, model development, data preprocessing,
-    scikit-learn, TensorFlow, PyTorch and deployment.
-    """,
-
-    "Data Scientist":
-    """
-    Data Scientist skilled in Python, SQL, statistics,
-    data analysis, machine learning, pandas, numpy,
-    visualization and predictive modeling.
-    """,
-
-    "Web Developer":
-    """
-    Web Developer skilled in HTML, CSS, JavaScript,
-    React, Node.js, databases, APIs and building websites.
-    """
-}
-
 #---------------- HEADER ----------------
 
 st.markdown(
@@ -313,163 +169,11 @@ analyze = st.button(
     use_container_width=True
 )
 
-#---------------- HELPER FUNCTIONS ----------------
-
-def extract_text_from_pdf(file): 
-    reader = PyPDF2.PdfReader(file) 
-    text = "" 
-    for page in reader.pages:
-         text += page.extract_text() or ""
-    return text.lower()
-
-def extract_text_from_txt(file): 
-    return file.read().decode("utf-8").lower()
-
-#Clean text for NLP
-
-def clean_text(text):
-     text = re.sub(r"[^a-zA-Z0-9 ]", " ", text) 
-     text = re.sub(r"\s+", " ", text) 
-     return text.strip().lower()
-
-    
-
-def extract_skills(text, skills_list):
-    text = clean_text(text)
-    found_skills = []
-
-    for skill in skills_list:
-        pattern = r"\b" + re.escape(skill.lower()) + r"\b"
-
-        if re.search(pattern, text):
-            found_skills.append(skill)
-
-    return sorted(list(set(found_skills)))
-
-#ML-based similarity using TF-IDF + Cosine Similarity
-
-def compute_similarity(resume_text, jd_text): 
-    vectorizer = TfidfVectorizer(stop_words="english")
-    vectors = vectorizer.fit_transform([resume_text, jd_text]) 
-    score = cosine_similarity(vectors[0:1], vectors[1:2])[0][0]
-    return round(score * 100, 2)
-
 #Keyword frequency
 
 def keyword_frequency(text):
      words = text.split() 
      return Counter(words).most_common(10)
-
-#Detailed scoring
-
-def detailed_scores(resume_text, jd_skills, matched_skills):
-    
-    # Resume Length Score
-    word_count = len(resume_text.split())
-
-    if word_count < 150:
-        length_score = 40
-    elif word_count < 250:
-        length_score = 70
-    elif word_count <= 700:
-        length_score = 100
-    else:
-        length_score = 80
-
-    # Skill Match Score
-    skill_score = (
-        len(matched_skills) /
-        max(len(jd_skills), 1)
-    ) * 100
-
-    # Keyword Score
-    keyword_score = skill_score
-
-    return (
-        int(length_score),
-        int(skill_score),
-        int(keyword_score)
-    )
-
-def calculate_final_score(
-    ml_score,
-    matched_skills,
-    jd_skills,
-    section_status,
-    resume_text
-):
-
-    # ---------- Skill Score ----------
-    if len(jd_skills) == 0:
-        skill_score = 0
-    else:
-        skill_score = (
-            len(matched_skills) /
-            len(jd_skills)
-        ) * 100
-
-    # ---------- Resume Length ----------
-    words = len(resume_text.split())
-
-    if words < 150:
-        length_score = 40
-    elif words < 250:
-        length_score = 70
-    elif words <= 700:
-        length_score = 100
-    else:
-        length_score = 80
-
-    # ---------- ATS Section Score ----------
-    section_score = (
-        sum(section_status.values())
-        / len(section_status)
-    ) * 100
-
-    # ---------- Final Score ----------
-    # Weight Distribution:
-    # Skill Match = 60%
-    # NLP Similarity = 10%
-    # ATS Sections = 20%
-    # Resume Quality = 10%
-    
-    final_score = (
-    skill_score * 0.60 +
-    ml_score * 0.10 +
-    section_score * 0.20 +
-    length_score * 0.10
-    )
-
-    return round(final_score, 2)
-
-#Improvement tips
-
-def advanced_tips(score, missing_skills):
-    
-    tips = []
-
-    if score >= 90:
-        tips.append("Excellent resume. Your profile is highly suitable for this role.")
-
-    elif score >= 75:
-        tips.append("Very good resume. Add a few missing skills to become a stronger candidate.")
-
-    elif score >= 60:
-        tips.append("Good foundation. Improve your resume by adding more relevant skills and projects.")
-
-    elif score >= 40:
-        tips.append("Your resume needs improvement. Add technical projects and strengthen your skills.")
-
-    else:
-        tips.append("Your resume currently doesn't match the selected role. Focus on building the required skills first.")
-
-    if missing_skills:
-        tips.append("Missing Skills: " + ", ".join(missing_skills))
-
-    if len(missing_skills) >= 5:
-        tips.append("Consider completing one project using these missing technologies.")
-
-    return tips
 
 #Highlight keywords
 
@@ -477,65 +181,6 @@ def highlight_keywords(text, skills):
      for skill in skills: 
         text = text.replace(skill, f"{skill.upper()}")
      return text
-
-def check_resume_sections(text):
-    
-    text = text.lower()
-
-    sections = {
-
-        "Contact Information": (
-            "gmail" in text or
-            "linkedin" in text or
-            "github" in text or
-            re.search(r"\b91\s?\d{10}\b", text) is not None or
-            re.search(r"\b\d{10}\b", text) is not None
-        ),
-
-        "Education": any(word in text for word in [
-            "b.tech",
-            "btech",
-            "be",
-            "b.e",
-            "bachelor",
-            "diploma",
-            "m.tech",
-            "mtech",
-            "college",
-            "university"
-        ]),
-
-        "Skills": len(extract_skills(text, common_skills)) >= 3,
-
-        "Projects": any(word in text for word in [
-            "project",
-            "expense tracker",
-            "resume analyzer",
-            "management system",
-            "dashboard",
-            "portfolio"
-        ]),
-
-        "Experience": any(word in text for word in [
-            "experience",
-            "intern",
-            "internship",
-            "worked",
-            "training"
-        ]),
-
-        "Certifications": any(word in text for word in [
-            "certificate",
-            "certification",
-            "certified",
-            "coursera",
-            "udemy",
-            "sololearn",
-            "nptel"
-        ])
-    }
-
-    return sections
 
 #---------------- ANALYSIS ----------------
 
@@ -563,7 +208,7 @@ if analyze:
             # NLP-based Similarity
             ml_score = compute_similarity(resume_text, job_text)
             # Skill extraction
-            resume_skills = extract_skills(resume_text, common_skills)
+            resume_skills = extract_skills(resume_text, COMMON_SKILLS)
             jd_skills = required_skills
             matched_skills = [
                 skill
