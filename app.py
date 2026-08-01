@@ -1,10 +1,10 @@
-#AI Resume Analyzer (Enhanced with NLP + ML)
-#Requirements:
-#pip install streamlit PyPDF2 scikit-learn matplotlib
-
 import streamlit as st 
 import matplotlib.pyplot as plt 
 from collections import Counter
+from src.quality_analyzer import analyze_resume_quality
+from src.normalization import normalize_resume_text
+from src.explainability import generate_explanation
+from src.report_generator import generate_pdf
 
 from src.config import (
     COMMON_SKILLS,
@@ -199,6 +199,8 @@ if analyze:
             else:
                 resume_text = extract_text_from_txt(uploaded_file)
             resume_text = clean_text(resume_text)
+            resume_text = normalize_resume_text(resume_text)
+            quality = analyze_resume_quality(resume_text)
             section_status = check_resume_sections(resume_text)
             required_skills = JOB_ROLE_SKILLS[job_role]
             job_text = JOB_ROLE_DESCRIPTION.get(
@@ -347,6 +349,14 @@ if analyze:
             matched_skills
             )
         
+        explanation = generate_explanation(
+            final_score,
+            skill_match_display,
+            ml_score,
+            ats_section_display,
+            length_score
+            )
+        
         st.markdown('<div class="card">', unsafe_allow_html=True)
         
         st.markdown(
@@ -399,6 +409,22 @@ if analyze:
                     )
                 
         st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown("## 📝 Resume Quality Analysis")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        col1.metric("Quality Score", f"{quality['score']}%")
+        col2.metric("Action Verbs", quality["action_verbs"])
+        col3.metric("Achievements", quality["numbers"])
+        col4.metric("Weak Phrases", quality["weak_phrases"])
+        
+        if quality["feedback"]:
+            st.subheader("Suggestions")
+        for item in quality["feedback"]:
+            st.warning(item)
+        else:
+            st.success("Excellent resume writing quality!")
     
         # ---------------- ATS RESUME SECTIONS ----------------
 
@@ -681,6 +707,18 @@ if analyze:
 
         tips = advanced_tips(final_score, missing_skills)
 
+        generate_pdf(
+            "resume_report.pdf",
+            job_role,
+            final_score,
+            ml_score,
+            skill_match_display,
+            ats_section_display,
+            matched_skills,
+            missing_skills,
+            tips
+            )
+
         st.markdown('<div class="card">', unsafe_allow_html=True)
 
         st.markdown(
@@ -733,6 +771,11 @@ if analyze:
             )
 
         st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown("## 🧠 Explainable AI")
+        
+        for line in explanation:
+            st.write(line)
 
         # ---------------- KEYWORD HIGHLIGHT ----------------
 
@@ -847,13 +890,14 @@ if analyze:
             unsafe_allow_html=True
         )
 
-    st.download_button(
-            "📥 Download Report",
-            report,
-            "resume_analysis_report.txt",
-            mime="text/plain",
+    with open("resume_report.pdf", "rb") as pdf_file:
+        st.download_button(
+            "📥 Download PDF Report",
+            pdf_file,
+            file_name="Resume_Analysis_Report.pdf",
+            mime="application/pdf",
             use_container_width=True
-        )
+            )
 
     st.markdown('</div>', unsafe_allow_html=True)
 
