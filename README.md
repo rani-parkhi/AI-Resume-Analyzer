@@ -84,7 +84,7 @@ AI-Resume-Analyzer/
 
 ### Resume Analysis
 
-![Analysis 1](assets/screenshots/resume_analysis1.jeg)
+![Analysis 1](assets/screenshots/resume_analysis1.jpeg)
 
 ![Analysis 2](assets/screenshots/resume_analysis2.jpeg)
 
