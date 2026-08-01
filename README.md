@@ -2,6 +2,12 @@
 
 An AI-powered Resume Analyzer built with **Python** and **Streamlit** that evaluates resumes against a selected job role using **Natural Language Processing (NLP)**, **ATS analysis**, and **skill matching**.
 
+## 🚀 Live Demo
+
+🔗 **Try the application here:**
+
+https://your-streamlit-app.streamlit.app
+
 ## 🚀 Features
 
 * 📄 Resume Parsing (PDF)
