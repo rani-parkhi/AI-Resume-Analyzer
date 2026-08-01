@@ -130,6 +130,37 @@ streamlit run app.py
 
 ---
 
+## ▶️ Usage
+
+1. Launch the Streamlit application:
+
+   ```bash
+   streamlit run app.py
+   ```
+
+2. Open the local URL displayed in your terminal (typically `http://localhost:8501`).
+
+3. Upload your resume in PDF format.
+
+4. Select your target job role from the dropdown menu.
+
+5. Click **Analyze Resume**.
+
+6. Review the generated results, including:
+
+   * Resume Match Score
+   * NLP Semantic Similarity
+   * ATS Resume Section Analysis
+   * Matched Skills
+   * Missing Skills
+   * Skill Coverage Chart
+   * Resume Quality Analysis
+   * Explainable AI Feedback
+   * Personalized Improvement Tips
+
+7. Download the generated PDF analysis report.
+
+
 ## 📋 How It Works
 
 1. Upload your resume (PDF).
