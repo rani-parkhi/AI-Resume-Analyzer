@@ -84,21 +84,21 @@ AI-Resume-Analyzer/
 
 ### Resume Analysis
 
-![Analysis 1](assets/screenshots/analysis1.jeg)
+![Analysis 1](assets/screenshots/resume_analysis1.jeg)
 
-![Analysis 2](assets/screenshots/analysis2.jpeg)
+![Analysis 2](assets/screenshots/resume_analysis2.jpeg)
 
-![Analysis 3](assets/screenshots/analysis3.jpeg)
+![Analysis 3](assets/screenshots/resume_analysis3.jpeg)
 
-![Analysis 4](assets/screenshots/analysis4.jpeg)
+![Analysis 4](assets/screenshots/resume_analysis4.jpeg)
 
-![Analysis 4](assets/screenshots/analysis5.jpeg)
+![Analysis 4](assets/screenshots/resume_analysis5.jpeg)
 
 ---
 
 ### Generated PDF Report
 
-![Report](assets/screenshots/report.jpeg)
+![Report](assets/screenshots/resume_report.jpeg)
 
 ---
 
